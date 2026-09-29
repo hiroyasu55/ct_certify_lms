@@ -1,0 +1,11 @@
+#!/bin/sh
+# main ブランチへの直接コミットを禁止する
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+if [ "$branch" = "main" ]; then
+    echo "エラー: main ブランチへの直接コミットは禁止されています。" >&2
+    echo "作業用ブランチを作成してからコミットしてください（例: git switch -c feature/xxx）。" >&2
+    exit 1
+fi
+
+exit 0

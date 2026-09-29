@@ -1,0 +1,12 @@
+#!/bin/sh
+# main ブランチへの push を禁止する
+# 標準入力: <local ref> <local sha> <remote ref> <remote sha>
+while read -r local_ref local_sha remote_ref remote_sha; do
+    if [ "$remote_ref" = "refs/heads/main" ]; then
+        echo "エラー: main ブランチへの push は禁止されています。" >&2
+        echo "作業用ブランチを push して Pull Request を作成してください。" >&2
+        exit 1
+    fi
+done
+
+exit 0
