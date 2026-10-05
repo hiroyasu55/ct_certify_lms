@@ -1,0 +1,48 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Http\QaThread;
+
+use App\Enums\QaThreadStatus;
+use App\Models\QaThread;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class UnresolveTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_投稿主は解決済の投稿を未解決にできる(): void
+    {
+        $thread = QaThread::factory()->resolved()->create();
+
+        $response = $this->actingAs($thread->user)
+            ->from(route('qa-board.show', $thread))
+            ->post(route('qa-board.unresolve', $thread));
+
+        $response->assertRedirect(route('qa-board.show', $thread));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('qa_threads', [
+            'id' => $thread->id,
+            'status' => QaThreadStatus::Unresolved,
+        ]);
+    }
+
+    public function test_投稿主でない受講生は未解決にできない(): void
+    {
+        $other = User::factory()->student()->create();
+        $thread = QaThread::factory()->resolved()->create();
+
+        $response = $this->actingAs($other)
+            ->from(route('qa-board.show', $thread))
+            ->post(route('qa-board.unresolve', $thread));
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('qa_threads', [
+            'id' => $thread->id,
+            'status' => QaThreadStatus::Resolved,
+        ]);
+    }
+}
