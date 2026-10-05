@@ -97,6 +97,14 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        // テスト用インメモリSQLite
+        // .env.testingでDB_CONNECTION=sqlite_testingと指定する
+        'sqlite_testing' => [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+            'foreign_key_constraints' => true,
+        ],
     ],
 
     /*
