@@ -46,7 +46,7 @@ class QaThreadTest extends TestCase
         $this->assertTrue($author->is($student));
     }
 
-    public function test_status_defaults_to_open(): void
+    public function test_status_defaults_to_unresolved(): void
     {
         // Arrange
         $thread = QaThread::factory()->create();
