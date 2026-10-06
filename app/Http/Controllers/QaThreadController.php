@@ -33,11 +33,21 @@ class QaThreadController extends Controller
         $this->authorize('viewAny', QaThread::class);
 
         $filters = $request->filters();
+        $user = $request->user();
+
+        $query = Certification::query();
+        if ($user->role !== UserRole::Admin) {
+            $query->published();
+        }
+        if ($user->role == UserRole::Coach) {
+            $query->assignedTo($user);
+        }
+        $query->orderBy('name');
 
         return view('qa-thread.index', [
-            'threads' => $action($request->user(), $filters),
+            'threads' => $action($user, $filters),
             'filters' => $filters,
-            'certifications' => $action($request->user(), $filters),
+            'certifications' => $query->get(),
             'publishedStatus' => CertificationStatus::Published,
         ]);
     }

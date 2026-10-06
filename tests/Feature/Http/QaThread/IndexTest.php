@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\QaThread;
 
+use App\Enums\CertificationStatus;
 use App\Enums\QaThreadStatus;
 use App\Models\Certification;
 use App\Models\QaThread;
@@ -52,6 +53,39 @@ class IndexTest extends TestCase
         $response = $this->actingAs($admin)->get(route('qa-board.index'));
 
         $response->assertForbidden();
+    }
+
+    public function test_受講生は公開中の資格で検索できる(): void
+    {
+        $student = User::factory()->student()->create();
+        $publishedCert = Certification::factory()->published()->create();
+        $archivedCert = Certification::factory()->archived()->create();
+
+        $response = $this->actingAs($student)->get(route('qa-board.index'));
+
+        $response->assertViewHas(
+            'certifications', 
+            fn ($certs) => $certs->pluck('id')->contains($publishedCert->id)
+                && !$certs->pluck('id')->contains($archivedCert->id)
+        );
+    }
+
+    public function test_コーチは公開中かつ自身が担当の資格で検索できる(): void
+    {
+        $coach = User::factory()->coach()->create();
+        $myCert = Certification::factory()->published()->create();
+        $this->assignCoach($coach, $myCert);
+        $otherCert = Certification::factory()->published()->create();
+        $archivedCert = Certification::factory()->archived()->create();
+
+        $response = $this->actingAs($coach)->get(route('qa-board.index'));
+
+        $response->assertViewHas(
+            'certifications', 
+            fn ($certs) => $certs->pluck('id')->contains($myCert->id)
+                && !$certs->pluck('id')->contains($otherCert->id)
+                && !$certs->pluck('id')->contains($archivedCert->id)
+        );
     }
 
     public function test_検索のバリデーション正常(): void

@@ -27,6 +27,21 @@ class IndexTest extends TestCase
         $response->assertSee($thread->title);
     }
 
+    public function test_管理者は公開中・非公開の資格で検索できる(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $publishedCert = Certification::factory()->published()->create();
+        $archivedCert = Certification::factory()->archived()->create();
+
+        $response = $this->actingAs($admin)->get(route('admin.qa-board.index'));
+
+        $response->assertViewHas(
+            'certifications', 
+            fn ($certs) => $certs->pluck('id')->contains($publishedCert->id)
+                && $certs->pluck('id')->contains($archivedCert->id)
+        );
+    }
+
     public function test_受講者はモデレーション画面にアクセスできない(): void
     {
         $student = User::factory()->student()->create();
