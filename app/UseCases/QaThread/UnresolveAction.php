@@ -19,7 +19,7 @@ final class UnresolveAction
     public function __invoke(QaThread $thread): QaThread
     {
         DB::transaction(fn () => $thread->update([
-            'status' => QaThreadStatus::Unresolved,
+            'status' => QaThreadStatus::Open,
             'resolved_at' => null,
         ]));
 

@@ -36,7 +36,7 @@ class StoreActionTest extends TestCase
 
         $fresh = $thread->fresh();
         $this->assertSame($student->id, $thread->user_id);
-        $this->assertSame(QaThreadStatus::Unresolved, $fresh->status);
+        $this->assertSame(QaThreadStatus::Open, $fresh->status);
         $this->assertNull($fresh->resolved_at);
     }
 }

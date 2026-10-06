@@ -95,14 +95,14 @@ class IndexTest extends TestCase
 
         $response = $this->actingAs($student)->get(route('qa-board.index', [
             'certification_id' => $cert->id,
-            'status' => QaThreadStatus::Unresolved,
+            'status' => 'unresolved',
             'keyword' => 'あいう',
         ]));
 
         $response->assertSessionHasNoErrors();
 
         $response = $this->actingAs($student)->get(route('qa-board.index', [
-            'status' => QaThreadStatus::Resolved,
+            'status' => 'resolved',
         ]));
 
         $response->assertSessionHasNoErrors();

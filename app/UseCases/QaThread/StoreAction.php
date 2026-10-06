@@ -24,7 +24,7 @@ final class StoreAction
             'user_id' => $user->id,
             'title' => $validated['title'],
             'body' => $validated['body'],
-            'status' => QaThreadStatus::Unresolved,
+            'status' => QaThreadStatus::Open,
         ]));
     }
 }

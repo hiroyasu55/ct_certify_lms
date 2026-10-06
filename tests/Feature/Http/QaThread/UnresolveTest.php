@@ -25,7 +25,7 @@ class UnresolveTest extends TestCase
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('qa_threads', [
             'id' => $thread->id,
-            'status' => QaThreadStatus::Unresolved,
+            'status' => QaThreadStatus::Open,
         ]);
     }
 

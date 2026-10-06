@@ -22,7 +22,7 @@ class UnresolveActionTest extends TestCase
 
         $fresh = $thread->fresh();
 
-        $this->assertSame(QaThreadStatus::Unresolved, $fresh->status);
+        $this->assertSame(QaThreadStatus::Open, $fresh->status);
         $this->assertNull($fresh->resolved_at);
     }
 }

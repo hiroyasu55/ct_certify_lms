@@ -25,7 +25,7 @@ class ResolveActionTest extends TestCase
     {
         Carbon::setTestNow(Carbon::parse('2026-09-01 10:00:00'));
 
-        $thread = QaThread::factory()->unresolved()->create();
+        $thread = QaThread::factory()->open()->create();
 
         app(ResolveAction::class)($thread);
 

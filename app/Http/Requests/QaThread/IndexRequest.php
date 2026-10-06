@@ -27,7 +27,7 @@ class IndexRequest extends FormRequest
     {
         return [
             'certification_id' => ['nullable', 'ulid', Rule::exists('certifications', 'id')],
-            'status' => ['nullable', 'string', Rule::in([QaThreadStatus::Unresolved, QaThreadStatus::Resolved])],
+            'status' => ['nullable', 'string', Rule::in(['unresolved', 'resolved'])],
             'keyword' => ['nullable', 'string', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],
         ];

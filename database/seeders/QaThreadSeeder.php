@@ -124,7 +124,7 @@ final class QaThreadSeeder extends Seeder
                 'title' => fake()->realText(40),
                 'body' => fake()->realText(200),
                 'days_ago' => 8 + $i,
-                'status' => $isResolved ? QaThreadStatus::Resolved : QaThreadStatus::Unresolved,
+                'status' => $isResolved ? QaThreadStatus::Resolved : QaThreadStatus::Open,
                 'resolved_days_ago' => $isResolved ? 7 + $i : null,
             ]);
 
@@ -141,7 +141,7 @@ final class QaThreadSeeder extends Seeder
     private function createThread(Certification $cert, User $author, array $attrs): QaThread
     {
         $createdAt = now()->subDays($attrs['days_ago']);
-        $status = $attrs['status'] ?? QaThreadStatus::Unresolved;
+        $status = $attrs['status'] ?? QaThreadStatus::Open;
         $resolvedDaysAgo = $attrs['resolved_days_ago'] ?? null;
 
         return QaThread::factory()->create([

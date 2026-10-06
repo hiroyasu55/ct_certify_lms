@@ -59,7 +59,7 @@ class StoreTest extends TestCase
         $response->assertRedirect(route('qa-board.show', $thread));
         $response->assertSessionHas('success');
         $this->assertSame($student->id, $thread->user_id);
-        $this->assertSame(QaThreadStatus::Unresolved, $thread->status, 'デフォルトは未解決');
+        $this->assertSame(QaThreadStatus::Open, $thread->status, 'デフォルトは未解決');
     }
 
     public function test_資格・件名・本文の必須バリデーション(): void

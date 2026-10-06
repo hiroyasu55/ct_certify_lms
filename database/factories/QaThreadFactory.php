@@ -27,15 +27,15 @@ class QaThreadFactory extends Factory
             'user_id' => User::factory()->student(),
             'title' => fake()->realText(50),
             'body' => fake()->realText(300),
-            'status' => QaThreadStatus::Unresolved->value,
+            'status' => QaThreadStatus::Open->value,
             'resolved_at' => null,
         ];
     }
 
-    public function unresolved(): static
+    public function open(): static
     {
         return $this->state(fn () => [
-            'status' => QaThreadStatus::Unresolved->value,
+            'status' => QaThreadStatus::Open->value,
             'resolved_at' => null,
         ]);
     }

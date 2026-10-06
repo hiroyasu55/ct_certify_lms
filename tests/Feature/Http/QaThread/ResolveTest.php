@@ -16,7 +16,7 @@ class ResolveTest extends TestCase
 
     public function test_投稿主は未解決の投稿を解決済にマークできる(): void
     {
-        $thread = QaThread::factory()->unresolved()->create();
+        $thread = QaThread::factory()->open()->create();
 
         $response = $this->actingAs($thread->user)
             ->post(route('qa-board.resolve', $thread));
@@ -32,7 +32,7 @@ class ResolveTest extends TestCase
     public function test_投稿主でない受講生は解決済にできない(): void
     {
         $other = User::factory()->student()->create();
-        $thread = QaThread::factory()->unresolved()->create();
+        $thread = QaThread::factory()->open()->create();
 
         $response = $this->actingAs($other)
             ->post(route('qa-board.resolve', $thread));
@@ -40,14 +40,14 @@ class ResolveTest extends TestCase
         $response->assertForbidden();
         $this->assertDatabaseHas('qa_threads', [
             'id' => $thread->id,
-            'status' => QaThreadStatus::Unresolved,
+            'status' => QaThreadStatus::Open,
         ]);
     }
 
     public function test_管理者は解決済にマークできない(): void
     {
         $admin = User::factory()->admin()->create();
-        $thread = QaThread::factory()->unresolved()->create();
+        $thread = QaThread::factory()->open()->create();
 
         $response = $this->actingAs($admin)
             ->post(route('qa-board.resolve', $thread));
@@ -55,7 +55,7 @@ class ResolveTest extends TestCase
         $response->assertForbidden();
         $this->assertDatabaseHas('qa_threads', [
             'id' => $thread->id,
-            'status' => QaThreadStatus::Unresolved,
+            'status' => QaThreadStatus::Open,
         ]);
     }
 }

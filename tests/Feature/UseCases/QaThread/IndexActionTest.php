@@ -87,12 +87,12 @@ class IndexActionTest extends TestCase
     public function test_ステータスで検索(): void
     {
         $student = User::factory()->student()->create();
-        $unresolved = QaThread::factory()->unresolved()->create();
+        $open = QaThread::factory()->open()->create();
         $resolved = QaThread::factory()->resolved()->create();
 
         $result = app(IndexAction::class)($student, ['status' => 'unresolved']);
 
-        $this->assertSame([$unresolved->id], $result->pluck('id')->all());
+        $this->assertSame([$open->id], $result->pluck('id')->all());
 
         $result = app(IndexAction::class)($student, ['status' => 'resolved']);
 
@@ -135,7 +135,7 @@ class IndexActionTest extends TestCase
         $cert = Certification::factory()->published()->create();
         $otherCert = Certification::factory()->published()->create();
         $target = QaThread::factory()->for($cert)->resolved()->create(['title' => 'あいうえお']);
-        QaThread::factory()->for($cert)->unresolved()->create(['title' => 'あいうえお']);
+        QaThread::factory()->for($cert)->open()->create(['title' => 'あいうえお']);
         QaThread::factory()->for($otherCert)->resolved()->create(['title' => 'あいうえお']);
         QaThread::factory()->for($cert)->resolved()->create(['title' => 'あいうお']);
 

@@ -46,7 +46,7 @@ class QaThreadTest extends TestCase
         $this->assertTrue($author->is($student));
     }
 
-    public function test_status_defaults_to_unresolved(): void
+    public function test_status_defaults_to_open(): void
     {
         // Arrange
         $thread = QaThread::factory()->create();
@@ -55,7 +55,7 @@ class QaThreadTest extends TestCase
         $fresh = $thread->fresh();
 
         // Assert
-        $this->assertSame(QaThreadStatus::Unresolved, $fresh->status, '作成直後のスレッドは未解決のはず');
+        $this->assertSame(QaThreadStatus::Open, $fresh->status, '作成直後のスレッドは未解決のはず');
     }
 
     public function test_status_cast_converts_to_enum(): void

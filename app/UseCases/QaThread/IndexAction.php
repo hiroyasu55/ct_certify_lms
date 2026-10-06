@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\UseCases\QaThread;
 
 use App\Enums\CertificationStatus;
+use App\Enums\QaThreadStatus;
 use App\Enums\UserRole;
 use App\Models\QaThread;
 use App\Models\User;
@@ -29,9 +30,13 @@ final class IndexAction
                 $filters['certification_id'] ?? null,
                 fn ($q) => $q->where('certification_id', $filters['certification_id'])
             )
+            // ステータスで検索 パラメータは'unresolved'→Open、'resolved'→Resolvedに変換
             ->when(
                 $filters['status'] ?? null,
-                fn ($q) => $q->where('status', $filters['status'])
+                fn ($q) => $q->where('status', match ($filters['status']) {
+                    'unresolved' => QaThreadStatus::Open,
+                    'resolved' => QaThreadStatus::Resolved,
+                })
             )
             // 管理者以外は公開中資格の質問のみ閲覧可
             ->when(
