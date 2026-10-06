@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\CertificationStatus;
 use App\Enums\UserRole;
+use App\Exceptions\QaThread\QaThreadHasRepliesException;
 use App\Http\Requests\QaThread\IndexRequest;
 use App\Http\Requests\QaThread\StoreRequest;
 use App\Http\Requests\QaThread\UpdateRequest;
@@ -90,7 +91,13 @@ class QaThreadController extends Controller
     {
         $this->authorize('delete', $thread);
 
-        $action($thread);
+        try {
+            $action($thread, $request->user());
+        } catch (QaThreadHasRepliesException $e) {
+            return redirect()
+                ->route('qa-board.show', $thread)
+                ->with('error', $e->getMessage());
+        }
 
         return redirect()
             ->route($request->user()->role == UserRole::Admin ? 'admin.qa-board.index' : 'qa-board.index')

@@ -43,7 +43,9 @@ class DestroyTest extends TestCase
 
         $response = $this->actingAs($thread->user)->delete(route('qa-board.destroy', $thread));
 
-        $response->assertForbidden();
+        $response->assertRedirect(route('qa-board.show', $thread));
+        $response->assertSessionHas('error', '回答が付いているスレッドは削除できません。');
+
         $this->assertDatabaseHas('qa_threads', ['id' => $thread->id]);
         $this->assertDatabaseHas('qa_replies', ['id' => $reply->id]);
     }

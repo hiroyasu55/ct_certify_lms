@@ -23,7 +23,7 @@ class QaThreadPolicy
 
     public function view(User $auth, QaThread $thread): bool
     {
-        return match($auth->role) {
+        return match ($auth->role) {
             UserRole::Student => $thread->certification->status === CertificationStatus::Published,
             UserRole::Coach => $thread->certification->status === CertificationStatus::Published
                 && $thread->certification->coaches->contains('id', $auth->id),
@@ -44,9 +44,9 @@ class QaThreadPolicy
 
     public function delete(User $auth, QaThread $thread): bool
     {
-        return match($auth->role) {
+        return match ($auth->role) {
             UserRole::Admin => true,
-            default => $thread->user_id === $auth->id && $thread->replies->count() == 0,
+            default => $thread->user_id === $auth->id,
         };
     }
 
