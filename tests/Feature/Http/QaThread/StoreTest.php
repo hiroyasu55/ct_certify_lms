@@ -62,7 +62,7 @@ class StoreTest extends TestCase
         $this->assertSame(QaThreadStatus::Unresolved, $thread->status, 'デフォルトは未解決');
     }
 
-    public function test_資格ID・件名・本文・の必須バリデーション(): void
+    public function test_資格・件名・本文の必須バリデーション(): void
     {
         $student = User::factory()->student()->create();
 

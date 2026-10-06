@@ -105,7 +105,7 @@ class IndexActionTest extends TestCase
         $byTitle = QaThread::factory()->create([
             'title' => 'あいうえお',
             'body' => 'かきくけこ',
-            'created_at' => now()->subDays(1)
+            'created_at' => now()->subDays(1),
         ]);
         $byContent = QaThread::factory()->create([
             'title' => 'かきくけこ',
@@ -219,5 +219,4 @@ class IndexActionTest extends TestCase
             $result->pluck('id')->all(),
         );
     }
-
 }
