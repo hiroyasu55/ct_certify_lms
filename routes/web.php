@@ -492,6 +492,20 @@ Route::middleware(['auth', 'role:student,coach', 'active-learning'])->prefix('qa
 });
 
 // ============================================================
+// 管理者 — 質問掲示板モデレーション
+// ============================================================
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('qa-board')->name('qa-board.')->group(function () {
+        Route::get('/', [QaThreadController::class, 'index'])->name('index');
+        Route::get('{thread}', [QaThreadController::class, 'show'])->name('show');
+        Route::delete('{thread}', [QaThreadController::class, 'destroy'])->name('destroy');
+        Route::prefix('{thread}/replies')->name('replies.')->scopeBindings()->group(function () {
+            Route::delete('{reply}', [QaReplyController::class, 'destroy'])->name('destroy');
+        });
+    });
+});
+
+// ============================================================
 // 開発専用: 共通コンポーネントショーケース(APP_ENV=local のみ表示)
 // ============================================================
 if (app()->environment('local')) {

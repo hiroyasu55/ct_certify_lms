@@ -19,7 +19,6 @@ class UnresolveTest extends TestCase
         $thread = QaThread::factory()->resolved()->create();
 
         $response = $this->actingAs($thread->user)
-            ->from(route('qa-board.show', $thread))
             ->post(route('qa-board.unresolve', $thread));
 
         $response->assertRedirect(route('qa-board.show', $thread));
@@ -36,7 +35,21 @@ class UnresolveTest extends TestCase
         $thread = QaThread::factory()->resolved()->create();
 
         $response = $this->actingAs($other)
-            ->from(route('qa-board.show', $thread))
+            ->post(route('qa-board.unresolve', $thread));
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('qa_threads', [
+            'id' => $thread->id,
+            'status' => QaThreadStatus::Resolved,
+        ]);
+    }
+
+    public function test_管理者は未解決にできない(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $thread = QaThread::factory()->resolved()->create();
+
+        $response = $this->actingAs($admin)
             ->post(route('qa-board.unresolve', $thread));
 
         $response->assertForbidden();

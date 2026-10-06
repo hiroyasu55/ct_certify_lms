@@ -63,4 +63,18 @@ class UpdateTest extends TestCase
         $response->assertForbidden();
         $this->assertDatabaseHas('qa_threads', ['id' => $thread->id, 'title' => '元のタイトル']);
     }
+
+    public function test_管理者は投稿を更新できない(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $thread = QaThread::factory()->create(['title' => '元のタイトル']);
+
+        $response = $this->actingAs($admin)->patch(route('qa-board.update', $thread), [
+            'title' => '書き換え',
+            'body' => '書き換え',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('qa_threads', ['id' => $thread->id, 'title' => '元のタイトル']);
+    }
 }

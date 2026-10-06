@@ -44,7 +44,10 @@ class QaThreadPolicy
 
     public function delete(User $auth, QaThread $thread): bool
     {
-        return $thread->user_id === $auth->id || $auth->role == UserRole::Admin;
+        return match($auth->role) {
+            UserRole::Admin => true,
+            default => $thread->user_id === $auth->id && $thread->replies->count() == 0,
+        };
     }
 
     public function resolve(User $auth, QaThread $thread): bool

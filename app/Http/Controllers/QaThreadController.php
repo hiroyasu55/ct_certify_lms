@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\CertificationStatus;
+use App\Enums\UserRole;
+use App\Http\Requests\QaThread\IndexRequest;
 use App\Http\Requests\QaThread\StoreRequest;
 use App\Http\Requests\QaThread\UpdateRequest;
 use App\Models\Certification;
@@ -25,16 +27,16 @@ use Illuminate\View\View;
  */
 class QaThreadController extends Controller
 {
-    public function index(Request $request, IndexAction $action): View
+    public function index(IndexRequest $request, IndexAction $action): View
     {
         $this->authorize('viewAny', QaThread::class);
 
-        $filters = $request->only(['certification_id', 'status', 'keyword']);
+        $filters = $request->filters();
 
         return view('qa-thread.index', [
             'threads' => $action($request->user(), $filters),
             'filters' => $filters,
-            'certifications' => Certification::query()->published()->get(),
+            'certifications' => $action($request->user(), $filters),
             'publishedStatus' => CertificationStatus::Published,
         ]);
     }
@@ -84,20 +86,14 @@ class QaThreadController extends Controller
             ->with('success', '質問を更新しました。');
     }
 
-    public function destroy(QaThread $thread, DestroyAction $action): RedirectResponse
+    public function destroy(QaThread $thread, Request $request, DestroyAction $action): RedirectResponse
     {
         $this->authorize('delete', $thread);
-
-        if ($thread->replies->count() > 0) {
-            return redirect()
-                ->route('qa-board.show', $thread)
-                ->with('error', '回答が付いているスレッドは削除できません。');
-        }
 
         $action($thread);
 
         return redirect()
-            ->route('qa-board.index')
+            ->route($request->user()->role == UserRole::Admin ? 'admin.qa-board.index' : 'qa-board.index')
             ->with('success', '質問を削除しました。');
     }
 

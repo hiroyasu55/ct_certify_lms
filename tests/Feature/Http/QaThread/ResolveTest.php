@@ -19,7 +19,6 @@ class ResolveTest extends TestCase
         $thread = QaThread::factory()->unresolved()->create();
 
         $response = $this->actingAs($thread->user)
-            ->from(route('qa-board.show', $thread))
             ->post(route('qa-board.resolve', $thread));
 
         $response->assertRedirect(route('qa-board.show', $thread));
@@ -36,7 +35,21 @@ class ResolveTest extends TestCase
         $thread = QaThread::factory()->unresolved()->create();
 
         $response = $this->actingAs($other)
-            ->from(route('qa-board.show', $thread))
+            ->post(route('qa-board.resolve', $thread));
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('qa_threads', [
+            'id' => $thread->id,
+            'status' => QaThreadStatus::Unresolved,
+        ]);
+    }
+
+    public function test_管理者は解決済にマークできない(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $thread = QaThread::factory()->unresolved()->create();
+
+        $response = $this->actingAs($admin)
             ->post(route('qa-board.resolve', $thread));
 
         $response->assertForbidden();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\QaReply\StoreRequest;
 use App\Http\Requests\QaReply\UpdateRequest;
 use App\Models\QaReply;
@@ -12,6 +13,7 @@ use App\UseCases\QaReply\DestroyAction;
 use App\UseCases\QaReply\StoreAction;
 use App\UseCases\QaReply\UpdateAction;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
@@ -49,14 +51,17 @@ class QaReplyController extends Controller
             ->with('success', '回答を更新しました。');
     }
 
-    public function destroy(QaThread $thread, QaReply $reply, DestroyAction $action): RedirectResponse
+    public function destroy(QaThread $thread, Request $request, QaReply $reply, DestroyAction $action): RedirectResponse
     {
         $this->authorize('delete', $reply);
 
         $action($reply);
 
         return redirect()
-            ->route('qa-board.show', $thread)
+            ->route(
+                $request->user()->role == UserRole::Admin ? 'admin.qa-board.show' : 'qa-board.show',
+                $thread
+            )
             ->with('success', '回答を削除しました。');
     }
 }
