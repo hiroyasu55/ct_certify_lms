@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\QaReply;
 
+use App\Models\Certification;
 use App\Models\QaReply;
 use App\Models\QaThread;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\ContentTestHelpers;
 use Tests\TestCase;
 
 class StoreTest extends TestCase
 {
-    use RefreshDatabase;
+    use ContentTestHelpers, RefreshDatabase;
 
-    public function test_コーチは回答を投稿できる(): void
+    public function test_コーチは担当する資格の質問への回答を投稿できる(): void
     {
         $coach = User::factory()->coach()->create();
-        $thread = QaThread::factory()->create();
+        $cert = Certification::factory()->published()->create();
+        $this->assignCoach($coach, $cert);
+        $thread = QaThread::factory()->for($cert)->create();
 
         $response = $this->actingAs($coach)->post(route('qa-board.replies.store', $thread), [
             'body' => 'コーチからの回答',
@@ -29,6 +33,19 @@ class StoreTest extends TestCase
         $this->assertSame($thread->id, $reply->qa_thread_id);
         $this->assertSame($coach->id, $reply->user_id);
         $this->assertSame('コーチからの回答', $reply->body);
+    }
+
+    public function test_コーチは担当でない資格の質問への回答は投稿できない(): void
+    {
+        $coach = User::factory()->coach()->create();
+        $thread = QaThread::factory()->create();
+
+        $response = $this->actingAs($coach)->post(route('qa-board.replies.store', $thread), [
+            'body' => 'コーチからの回答',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseCount('qa_replies', 0);
     }
 
     public function test_受講生は回答を投稿できる(): void
@@ -59,14 +76,14 @@ class StoreTest extends TestCase
 
     public function test_回答のバリデーション(): void
     {
-        $coach = User::factory()->coach()->create();
+        $student = User::factory()->student()->create();
         $thread = QaThread::factory()->create();
 
-        $this->actingAs($coach)
+        $this->actingAs($student)
             ->post(route('qa-board.replies.store', $thread), [])
             ->assertSessionHasErrors('body');
 
-        $this->actingAs($coach)
+        $this->actingAs($student)
             ->post(route('qa-board.replies.store', $thread), ['body' => str_repeat('あ', 5001)])
             ->assertSessionHasErrors('body');
 
