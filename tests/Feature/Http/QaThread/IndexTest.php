@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\QaThread;
 
-use App\Enums\CertificationStatus;
-use App\Enums\QaThreadStatus;
 use App\Models\Certification;
 use App\Models\QaThread;
 use App\Models\User;
@@ -64,9 +62,9 @@ class IndexTest extends TestCase
         $response = $this->actingAs($student)->get(route('qa-board.index'));
 
         $response->assertViewHas(
-            'certifications', 
+            'certifications',
             fn ($certs) => $certs->pluck('id')->contains($publishedCert->id)
-                && !$certs->pluck('id')->contains($archivedCert->id)
+                && ! $certs->pluck('id')->contains($archivedCert->id)
         );
     }
 
@@ -81,10 +79,10 @@ class IndexTest extends TestCase
         $response = $this->actingAs($coach)->get(route('qa-board.index'));
 
         $response->assertViewHas(
-            'certifications', 
+            'certifications',
             fn ($certs) => $certs->pluck('id')->contains($myCert->id)
-                && !$certs->pluck('id')->contains($otherCert->id)
-                && !$certs->pluck('id')->contains($archivedCert->id)
+                && ! $certs->pluck('id')->contains($otherCert->id)
+                && ! $certs->pluck('id')->contains($archivedCert->id)
         );
     }
 

@@ -34,7 +34,7 @@ class QaReplyPolicy
 
     public function delete(User $auth, QaReply $reply): bool
     {
-        return match($auth->role) {
+        return match ($auth->role) {
             UserRole::Admin => true,
             default => $reply->user_id === $auth->id,
         };

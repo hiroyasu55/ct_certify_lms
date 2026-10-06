@@ -18,7 +18,7 @@ class UpdateActionTest extends TestCase
     public function test_本文を更新する(): void
     {
         $reply = QaReply::factory()->create();
- 
+
         $result = app(UpdateAction::class)($reply, ['body' => '更新後本文']);
 
         $this->assertDatabaseHas('qa_replies', [

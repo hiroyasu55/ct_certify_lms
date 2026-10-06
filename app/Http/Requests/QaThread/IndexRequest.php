@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\QaThread;
 
-use App\Enums\QaThreadStatus;
-use App\Enums\UserRole;
 use App\Models\QaThread;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;

@@ -88,7 +88,7 @@ class UpdateTest extends TestCase
             ])
             ->assertSessionHasErrors('body');
         $this->assertDatabaseHas('qa_replies', ['id' => $reply->id, 'body' => '元の回答']);
-        
+
         $this->actingAs($reply->user)
             ->patch(route('qa-board.replies.update', ['thread' => $reply->qa_thread_id, 'reply' => $reply->id]), [
                 'body' => str_repeat('あ', 5001),

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\QaThread\Admin;
 
-use App\Enums\QaThreadStatus;
 use App\Models\Certification;
 use App\Models\QaThread;
 use App\Models\User;
@@ -36,7 +35,7 @@ class IndexTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.qa-board.index'));
 
         $response->assertViewHas(
-            'certifications', 
+            'certifications',
             fn ($certs) => $certs->pluck('id')->contains($publishedCert->id)
                 && $certs->pluck('id')->contains($archivedCert->id)
         );

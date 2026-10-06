@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\QaThread\Admin;
 
-use App\Enums\QaThreadStatus;
 use App\Models\Certification;
 use App\Models\QaReply;
 use App\Models\QaThread;
