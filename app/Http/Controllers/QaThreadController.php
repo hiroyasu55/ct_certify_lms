@@ -69,8 +69,6 @@ class QaThreadController extends Controller
 
     public function store(StoreRequest $request, StoreAction $action): RedirectResponse
     {
-        $this->authorize('create', QaThread::class);
-
         $thread = $action($request->user(), $request->validated());
 
         return redirect()
@@ -98,8 +96,6 @@ class QaThreadController extends Controller
 
     public function update(QaThread $thread, UpdateRequest $request, UpdateAction $action): RedirectResponse
     {
-        $this->authorize('update', $thread);
-
         $action($thread, $request->validated());
 
         return redirect()
@@ -112,7 +108,7 @@ class QaThreadController extends Controller
         $this->authorize('delete', $thread);
 
         try {
-            $action($thread, $request->user());
+            $action($request->user(), $thread);
         } catch (QaThreadHasRepliesException $e) {
             return redirect()
                 ->route('qa-board.show', $thread)

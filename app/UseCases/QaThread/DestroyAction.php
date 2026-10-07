@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\DB;
  */
 final class DestroyAction
 {
-    public function __invoke(QaThread $thread, ?User $user = null): void
+    public function __invoke(User $user, QaThread $thread): void
     {
         // 管理者以外で回答の付いている質問を削除しようとする場合例外発出
-        if ($user?->role !== UserRole::Admin && $thread->replies()->exists()) {
+        if ($user->role !== UserRole::Admin && $thread->replies()->exists()) {
             throw new QaThreadHasRepliesException;
         }
 

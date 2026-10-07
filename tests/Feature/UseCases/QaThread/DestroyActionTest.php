@@ -16,42 +16,25 @@ class DestroyActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_回答のないスレッドを削除する(): void
+    public function test_受講生が回答のないスレッドを削除する(): void
     {
+        $student = User::factory()->student()->create();
         $thread = QaThread::factory()->create();
 
-        app(DestroyAction::class)($thread);
+        app(DestroyAction::class)($student, $thread);
 
         $this->assertDatabaseMissing('qa_threads', ['id' => $thread->id]);
-    }
-
-    public function test_回答のあるスレッドをユーザー未指定で削除すると例外(): void
-    {
-        $thread = QaThread::factory()->hasReplies(1)->create();
-
-        $this->expectException(QaThreadHasRepliesException::class);
-
-        app(DestroyAction::class)($thread);
     }
 
     public function test_回答のあるスレッドを受講者が削除すると例外(): void
     {
         $student = User::factory()->student()->create();
-        $thread = QaThread::factory()->hasReplies(1)->create();
+        $thread = QaThread::factory()->create();
+        QaReply::factory()->forThread($thread)->create();
 
         $this->expectException(QaThreadHasRepliesException::class);
 
-        app(DestroyAction::class)($thread, $student);
-    }
-
-    public function test_回答のあるスレッドをコーチが削除すると例外(): void
-    {
-        $coach = User::factory()->coach()->create();
-        $thread = QaThread::factory()->hasReplies(1)->create();
-
-        $this->expectException(QaThreadHasRepliesException::class);
-
-        app(DestroyAction::class)($thread, $coach);
+        app(DestroyAction::class)($student, $thread);
     }
 
     public function test_回答のあるスレッドを管理者は削除可能(): void
@@ -60,7 +43,7 @@ class DestroyActionTest extends TestCase
         $reply = QaReply::factory()->forThread($thread)->create();
         $admin = User::factory()->admin()->create();
 
-        app(DestroyAction::class)($thread, $admin);
+        app(DestroyAction::class)($admin, $thread);
 
         $this->assertDatabaseMissing('qa_threads', ['id' => $thread->id]);
         // 回答も削除
@@ -69,11 +52,12 @@ class DestroyActionTest extends TestCase
 
     public function test_他のスレッドには影響しない(): void
     {
+        $student = User::factory()->student()->create();
         $thread = QaThread::factory()->create();
         $other = QaThread::factory()->create();
         $otherReply = QaReply::factory()->forThread($other)->create();
 
-        app(DestroyAction::class)($thread);
+        app(DestroyAction::class)($student, $thread);
 
         $this->assertDatabaseHas('qa_threads', ['id' => $other->id]);
         $this->assertDatabaseHas('qa_replies', ['id' => $otherReply->id]);
