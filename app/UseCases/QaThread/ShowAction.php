@@ -16,7 +16,7 @@ final class ShowAction
     public function __invoke(QaThread $thread): QaThread
     {
         $thread
-            ->load([
+            ->loadMissing([
                 'certification',
                 'user',
                 'replies' => fn ($q) => $q->with('user')->orderBy('created_at'),
