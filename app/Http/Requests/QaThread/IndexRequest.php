@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\QaThread;
 
+use App\Enums\UserRole;
 use App\Models\QaThread;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -29,6 +30,23 @@ class IndexRequest extends FormRequest
             'keyword' => ['nullable', 'string', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],
         ];
+    }
+
+    /**
+     * コーチが担当中の資格を certification_id に指定しているか
+     *
+     * 一覧クエリでの資格 ID 列挙を防ぐため、Controller はこれが true なら 403 にする。
+     */
+    public function isUnassignedCertificationForCoach(): bool
+    {
+        $user = $this->user();
+        $certificationId = $this->input('certification_id');
+
+        if ($user?->role !== UserRole::Coach || blank($certificationId)) {
+            return false;
+        }
+
+        return ! in_array($certificationId, $user->coachingCertificationIds(), true);
     }
 
     /**

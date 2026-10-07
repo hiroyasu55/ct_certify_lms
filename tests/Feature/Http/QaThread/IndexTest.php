@@ -44,16 +44,7 @@ class IndexTest extends TestCase
         $response->assertDontSee($otherThread->title);
     }
 
-    public function test_管理者はスレッド一覧を閲覧できない(): void
-    {
-        $admin = User::factory()->admin()->create();
-
-        $response = $this->actingAs($admin)->get(route('qa-board.index'));
-
-        $response->assertForbidden();
-    }
-
-    public function test_受講生は公開中の資格で検索できる(): void
+    public function test_受講生は公開中の資格が選択肢として表示される(): void
     {
         $student = User::factory()->student()->create();
         $publishedCert = Certification::factory()->published()->create();
@@ -68,7 +59,17 @@ class IndexTest extends TestCase
         );
     }
 
-    public function test_コーチは公開中かつ自身が担当の資格で検索できる(): void
+    public function test_受講生は資格を指定して検索できる(): void
+    {
+        $student = User::factory()->student()->create();
+        $cert = Certification::factory()->published()->create();
+
+        $response = $this->actingAs($student)->get(route('qa-board.index', ['certification_id' => $cert->id]));
+
+        $response->assertOk();
+    }
+
+    public function test_コーチは公開中かつ担当資格のみ選択肢として表示される(): void
     {
         $coach = User::factory()->coach()->create();
         $myCert = Certification::factory()->published()->create();
@@ -84,6 +85,38 @@ class IndexTest extends TestCase
                 && ! $certs->pluck('id')->contains($otherCert->id)
                 && ! $certs->pluck('id')->contains($archivedCert->id)
         );
+    }
+
+    public function test_コーチは担当資格を指定して検索できる(): void
+    {
+        $coach = User::factory()->coach()->create();
+        $cert = Certification::factory()->published()->create();
+        $this->assignCoach($coach, $cert);
+
+        $response = $this->actingAs($coach)->get(route('qa-board.index', ['certification_id' => $cert->id]));
+
+        $response->assertOk();
+    }
+
+    public function test_コーチは担当外資格を指定して検索すると403エラー(): void
+    {
+        $coach = User::factory()->coach()->create();
+        $otherCert = Certification::factory()->published()->create();
+
+        $response = $this->actingAs($coach)->get(route('qa-board.index', [
+            'certification_id' => $otherCert->id
+        ]));
+
+        $response->assertForbidden();
+    }
+
+    public function test_管理者はスレッド一覧を閲覧できない(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->get(route('qa-board.index'));
+
+        $response->assertForbidden();
     }
 
     public function test_検索のバリデーション正常(): void

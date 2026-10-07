@@ -22,6 +22,7 @@ use App\UseCases\QaThread\UpdateAction;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * 受講生 / コーチ共有の質問掲示板 Controller。質問スレッドの CRUD を提供する。
@@ -31,6 +32,11 @@ class QaThreadController extends Controller
     public function index(IndexRequest $request, IndexAction $action): View
     {
         $this->authorize('viewAny', QaThread::class);
+
+        // コーチが担当外の資格で検索を行った場合403エラーとする
+        if ($request->isUnassignedCertificationForCoach()) {
+            throw new AccessDeniedHttpException('担当外の資格にはアクセスできません。');
+        }
 
         $filters = $request->filters();
         $user = $request->user();
