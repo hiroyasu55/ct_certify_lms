@@ -15,12 +15,15 @@ final class ShowAction
 {
     public function __invoke(QaThread $thread): QaThread
     {
-        return $thread
+        $thread
             ->load([
                 'certification',
                 'user',
                 'replies' => fn ($q) => $q->with('user')->orderBy('created_at'),
             ])
             ->loadCount('replies');
+        $thread->replies->each->setRelation('thread', $thread);
+
+        return $thread;
     }
 }
