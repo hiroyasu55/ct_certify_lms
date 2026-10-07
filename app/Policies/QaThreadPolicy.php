@@ -18,6 +18,14 @@ use Illuminate\Auth\Access\Response;
 class QaThreadPolicy
 {
     /**
+     * 公開中資格かどうか判定
+     */
+    private function isPublished(QaThread $thread): bool
+    {
+        return $thread->certification->status === CertificationStatus::Published;
+    }
+
+    /**
      * 投稿者本人かどうか判定
      */
     private function authorOnly(User $auth, QaThread $thread): Response
@@ -35,10 +43,10 @@ class QaThreadPolicy
     public function view(User $auth, QaThread $thread): Response
     {
         return match ($auth->role) {
-            UserRole::Student => $thread->certification->status === CertificationStatus::Published
+            UserRole::Student => $this->isPublished($thread)
                 ? Response::allow()
                 : Response::denyAsNotFound(),
-            UserRole::Coach => $thread->certification->status === CertificationStatus::Published
+            UserRole::Coach => $this->isPublished($thread)
                 ? (
                     $thread->certification->coaches->contains('id', $auth->id)
                         ? Response::allow()
@@ -58,7 +66,7 @@ class QaThreadPolicy
     public function update(User $auth, QaThread $thread): Response
     {
         return match ($auth->role) {
-            UserRole::Student => $thread->certification->status === CertificationStatus::Published
+            UserRole::Student => $this->isPublished($thread)
                 ? $this->authorOnly($auth, $thread)
                 : Response::denyAsNotFound(),
             default => Response::deny(),
@@ -68,7 +76,7 @@ class QaThreadPolicy
     public function delete(User $auth, QaThread $thread): Response
     {
         return match ($auth->role) {
-            UserRole::Student => $thread->certification->status === CertificationStatus::Published
+            UserRole::Student => $this->isPublished($thread)
                 ? $this->authorOnly($auth, $thread)
                 : Response::denyAsNotFound(),
             UserRole::Admin => Response::allow(),
@@ -79,7 +87,7 @@ class QaThreadPolicy
     public function resolve(User $auth, QaThread $thread): Response
     {
         return match ($auth->role) {
-            UserRole::Student => $thread->certification->status === CertificationStatus::Published
+            UserRole::Student => $this->isPublished($thread)
                 ? $this->authorOnly($auth, $thread)
                 : Response::denyAsNotFound(),
             default => Response::deny(),
@@ -89,7 +97,7 @@ class QaThreadPolicy
     public function unresolve(User $auth, QaThread $thread): Response
     {
         return match ($auth->role) {
-            UserRole::Student => $thread->certification->status === CertificationStatus::Published
+            UserRole::Student => $this->isPublished($thread)
                 ? $this->authorOnly($auth, $thread)
                 : Response::denyAsNotFound(),
             default => Response::deny(),

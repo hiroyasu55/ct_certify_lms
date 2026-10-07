@@ -19,6 +19,15 @@ use Illuminate\Auth\Access\Response;
 class QaReplyPolicy
 {
     /**
+     * 公開中資格かどうか判定
+     */
+    private function isPublished(QaThread|QaReply $target): bool
+    {
+        $thread = $target instanceof QaReply ? $target->thread : $target;
+        return $thread->certification->status === CertificationStatus::Published;
+    }
+
+    /**
      * 投稿者本人かどうか判定
      */
     private function authorOnly(User $auth, QaReply $reply): Response
@@ -31,7 +40,7 @@ class QaReplyPolicy
     public function create(User $auth, QaThread $thread): Response
     {
         return match ($auth->role) {
-            UserRole::Student => $thread->certification->status === CertificationStatus::Published
+            UserRole::Student => $this->isPublished($thread)
                 ? Response::allow()
                 : Response::denyAsNotFound(),
             UserRole::Coach => $thread->certification->status === CertificationStatus::Published
@@ -48,10 +57,10 @@ class QaReplyPolicy
     public function update(User $auth, QaReply $reply): Response
     {
         return match ($auth->role) {
-            UserRole::Student => $reply->thread->certification->status === CertificationStatus::Published
+            UserRole::Student => $this->isPublished($reply)
                 ? $this->authorOnly($auth, $reply)
                 : Response::denyAsNotFound(),
-            UserRole::Coach => $reply->thread->certification->status === CertificationStatus::Published
+            UserRole::Coach => $this->isPublished($reply)
                 ? (
                     $reply->thread->certification->coaches->contains('id', $auth->id)
                         ? $this->authorOnly($auth, $reply)
@@ -65,10 +74,10 @@ class QaReplyPolicy
     public function delete(User $auth, QaReply $reply): Response
     {
         return match ($auth->role) {
-            UserRole::Student => $reply->thread->certification->status === CertificationStatus::Published
-                ? ($reply->user_id === $auth->id ? Response::allow() : Response::deny())
+            UserRole::Student => $this->isPublished($reply)
+                ? $this->authorOnly($auth, $reply)
                 : Response::denyAsNotFound(),
-            UserRole::Coach => $reply->thread->certification->status === CertificationStatus::Published
+            UserRole::Coach => $this->isPublished($reply)
                 ? (
                     $reply->thread->certification->coaches->contains('id', $auth->id)
                         ? $this->authorOnly($auth, $reply)
