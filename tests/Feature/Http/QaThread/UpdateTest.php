@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\QaThread;
 
+use App\Models\Certification;
 use App\Models\QaThread;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -61,6 +62,20 @@ class UpdateTest extends TestCase
         ]);
 
         $response->assertForbidden();
+        $this->assertDatabaseHas('qa_threads', ['id' => $thread->id, 'title' => '元のタイトル']);
+    }
+
+    public function test_アーカイブ済の資格の投稿は更新できない(): void
+    {
+        $cert = Certification::factory()->archived()->create();
+        $thread = QaThread::factory()->for($cert)->create(['title' => '元のタイトル']);
+
+        $response = $this->actingAs($thread->user)->patch(route('qa-board.update', $thread), [
+            'title' => '更新後タイトル',
+            'body' => '更新後本文',
+        ]);
+
+        $response->assertNotFound();
         $this->assertDatabaseHas('qa_threads', ['id' => $thread->id, 'title' => '元のタイトル']);
     }
 

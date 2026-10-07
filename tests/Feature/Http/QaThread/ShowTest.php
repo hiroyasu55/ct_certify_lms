@@ -38,7 +38,7 @@ class ShowTest extends TestCase
 
         $response = $this->actingAs($student)->get(route('qa-board.show', $thread));
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function test_コーチは公開中かつ担当資格の投稿を閲覧できる(): void
@@ -62,7 +62,7 @@ class ShowTest extends TestCase
 
         $response = $this->actingAs($student)->get(route('qa-board.show', $thread));
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function test_コーチは担当でない資格の投稿を閲覧できない(): void

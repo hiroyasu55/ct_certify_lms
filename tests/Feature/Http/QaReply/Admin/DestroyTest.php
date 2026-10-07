@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\QaReply\Admin;
 
+use App\Models\Certification;
 use App\Models\QaReply;
 use App\Models\QaThread;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\ContentTestHelpers;
 use Tests\TestCase;
 
 class DestroyTest extends TestCase
 {
-    use RefreshDatabase;
+    use ContentTestHelpers, RefreshDatabase;
 
     public function test_管理者は回答を削除できる(): void
     {
@@ -55,7 +57,10 @@ class DestroyTest extends TestCase
     public function test_コーチは自身の投稿でも回答を削除できない(): void
     {
         $coach = User::factory()->coach()->create();
-        $reply = QaReply::factory()->for($coach)->create();
+        $cert = Certification::factory()->published()->create();
+        $this->assignCoach($coach, $cert);
+        $thread = QaThread::factory()->for($cert)->create();
+        $reply = QaReply::factory()->forThread($thread)->for($coach)->create();
 
         $response = $this->actingAs($coach)
             ->delete(route('admin.qa-board.replies.destroy', ['thread' => $reply->qa_thread_id, 'reply' => $reply->id]));

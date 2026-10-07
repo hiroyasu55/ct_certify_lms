@@ -6,7 +6,9 @@ namespace App\Http\Requests\QaThread;
 
 use App\Enums\CertificationStatus;
 use App\Models\QaThread;
+use Illuminate\Auth\Access\Response;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 /**
@@ -14,9 +16,10 @@ use Illuminate\Validation\Rule;
  */
 class StoreRequest extends FormRequest
 {
-    public function authorize(): bool
+    public function authorize(): Response
     {
-        return $this->user()?->can('create', QaThread::class) ?? false;
+        // Policyの規定するResponseを返す
+        return Gate::inspect('create', QaThread::class);
     }
 
     /**

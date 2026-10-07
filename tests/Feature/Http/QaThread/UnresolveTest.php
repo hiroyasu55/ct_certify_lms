@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Http\QaThread;
 
 use App\Enums\QaThreadStatus;
+use App\Models\Certification;
 use App\Models\QaThread;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -38,6 +39,21 @@ class UnresolveTest extends TestCase
             ->post(route('qa-board.unresolve', $thread));
 
         $response->assertForbidden();
+        $this->assertDatabaseHas('qa_threads', [
+            'id' => $thread->id,
+            'status' => QaThreadStatus::Resolved,
+        ]);
+    }
+
+    public function test_アーカイブ済の資格の投稿は更新できない(): void
+    {
+        $cert = Certification::factory()->archived()->create();
+        $thread = QaThread::factory()->for($cert)->resolved()->create();
+
+        $response = $this->actingAs($thread->user)
+            ->post(route('qa-board.unresolve', $thread));
+
+        $response->assertNotFound();
         $this->assertDatabaseHas('qa_threads', [
             'id' => $thread->id,
             'status' => QaThreadStatus::Resolved,

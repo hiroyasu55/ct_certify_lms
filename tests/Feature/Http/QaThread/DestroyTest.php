@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\QaThread;
 
+use App\Models\Certification;
 use App\Models\QaReply;
 use App\Models\QaThread;
 use App\Models\User;
@@ -33,6 +34,17 @@ class DestroyTest extends TestCase
         $response = $this->actingAs($other)->delete(route('qa-board.destroy', $thread));
 
         $response->assertForbidden();
+        $this->assertDatabaseHas('qa_threads', ['id' => $thread->id]);
+    }
+
+    public function test_アーカイブ済の資格の投稿は削除できない(): void
+    {
+        $cert = Certification::factory()->archived()->create();
+        $thread = QaThread::factory()->for($cert)->open()->create();
+
+        $response = $this->actingAs($thread->user)->delete(route('qa-board.destroy', $thread));
+
+        $response->assertNotFound();
         $this->assertDatabaseHas('qa_threads', ['id' => $thread->id]);
     }
 

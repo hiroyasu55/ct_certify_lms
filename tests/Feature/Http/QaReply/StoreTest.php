@@ -61,6 +61,20 @@ class StoreTest extends TestCase
         $this->assertDatabaseHas('qa_replies', ['qa_thread_id' => $thread->id, 'user_id' => $student->id]);
     }
 
+    public function test_アーカイブ済資格の回答投稿は404エラー(): void
+    {
+        $student = User::factory()->student()->create();
+        $cert = Certification::factory()->archived()->create();
+        $thread = QaThread::factory()->for($cert)->create();
+
+        $response = $this->actingAs($student)->post(route('qa-board.replies.store', $thread), [
+            'body' => '受講生からの回答',
+        ]);
+
+        $response->assertNotFound();
+        $this->assertDatabaseCount('qa_replies', 0);
+    }
+
     public function test_管理者は回答を投稿できない(): void
     {
         $admin = User::factory()->admin()->create();

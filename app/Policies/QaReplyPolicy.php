@@ -9,6 +9,7 @@ use App\Enums\UserRole;
 use App\Models\QaReply;
 use App\Models\QaThread;
 use App\Models\User;
+use Illuminate\Auth\Access\Response;
 
 /**
  * 質問スレッドへの回答の認可ルール。
@@ -17,26 +18,65 @@ use App\Models\User;
  */
 class QaReplyPolicy
 {
-    public function create(User $auth, QaThread $thread): bool
+    /**
+     * 投稿者本人かどうか判定
+     */
+    private function authorOnly(User $auth, QaReply $reply): Response
+    {
+        return $reply->user_id === $auth->id
+            ? Response::allow()
+            : Response::deny();
+    }
+
+    public function create(User $auth, QaThread $thread): Response
     {
         return match ($auth->role) {
-            UserRole::Student => $thread->certification->status === CertificationStatus::Published,
+            UserRole::Student => $thread->certification->status === CertificationStatus::Published
+                ? Response::allow()
+                : Response::denyAsNotFound(),
             UserRole::Coach => $thread->certification->status === CertificationStatus::Published
-                && $thread->certification->coaches->contains('id', $auth->id),
-            default => false,
+                ? (
+                    $thread->certification->coaches->contains('id', $auth->id)
+                        ? Response::allow()
+                        : Response::deny()
+                )
+                : Response::denyAsNotFound(),
+            default => Response::deny(),
         };
     }
 
-    public function update(User $auth, QaReply $reply): bool
-    {
-        return $reply->user_id === $auth->id;
-    }
-
-    public function delete(User $auth, QaReply $reply): bool
+    public function update(User $auth, QaReply $reply): Response
     {
         return match ($auth->role) {
-            UserRole::Admin => true,
-            default => $reply->user_id === $auth->id,
+            UserRole::Student => $reply->thread->certification->status === CertificationStatus::Published
+                ? $this->authorOnly($auth, $reply)
+                : Response::denyAsNotFound(),
+            UserRole::Coach => $reply->thread->certification->status === CertificationStatus::Published
+                ? (
+                    $reply->thread->certification->coaches->contains('id', $auth->id)
+                        ? $this->authorOnly($auth, $reply)
+                        : Response::deny()
+                )
+                : Response::denyAsNotFound(),
+            default => Response::deny(),
+        };
+    }
+
+    public function delete(User $auth, QaReply $reply): Response
+    {
+        return match ($auth->role) {
+            UserRole::Student => $reply->thread->certification->status === CertificationStatus::Published
+                ? ($reply->user_id === $auth->id ? Response::allow() : Response::deny())
+                : Response::denyAsNotFound(),
+            UserRole::Coach => $reply->thread->certification->status === CertificationStatus::Published
+                ? (
+                    $reply->thread->certification->coaches->contains('id', $auth->id)
+                        ? $this->authorOnly($auth, $reply)
+                        : Response::deny()
+                )
+                : Response::denyAsNotFound(),
+            UserRole::Admin => Response::allow(),
+            default => Response::deny(),
         };
     }
 }

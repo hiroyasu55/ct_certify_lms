@@ -86,10 +86,10 @@ class StoreTest extends TestCase
         $response->assertSessionHasErrors(['title', 'body']);
     }
 
-    public function test_下書きの資格への質問は不可(): void
+    public function test_アーカイブ済資格への質問は不可(): void
     {
         $student = User::factory()->student()->create();
-        $cert = Certification::factory()->draft()->create();
+        $cert = Certification::factory()->archived()->create();
 
         $response = $this->actingAs($student)->post(route('qa-board.store'), [
             'certification_id' => $cert->id,
