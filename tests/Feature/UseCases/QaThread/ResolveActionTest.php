@@ -34,4 +34,20 @@ class ResolveActionTest extends TestCase
         $this->assertSame(QaThreadStatus::Resolved, $fresh->status);
         $this->assertSame('2026-09-01 10:00:00', $fresh->resolved_at->format('Y-m-d H:i:s'));
     }
+
+    public function test_既に解決済の場合は解決日時を更新しない(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-09-01 10:00:00'));
+
+        $thread = QaThread::factory()->resolved()->create([
+            'resolved_at' => '2026-08-01 10:00:00',
+        ]);
+
+        app(ResolveAction::class)($thread);
+
+        $fresh = $thread->fresh();
+
+        $this->assertSame(QaThreadStatus::Resolved, $fresh->status);
+        $this->assertSame('2026-08-01 10:00:00', $fresh->resolved_at->format('Y-m-d H:i:s'));
+    }
 }

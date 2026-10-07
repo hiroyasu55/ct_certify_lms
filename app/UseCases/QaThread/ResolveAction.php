@@ -18,10 +18,13 @@ final class ResolveAction
      */
     public function __invoke(QaThread $thread): QaThread
     {
-        DB::transaction(fn () => $thread->update([
-            'status' => QaThreadStatus::Resolved,
-            'resolved_at' => now(),
-        ]));
+        // 既に解決済の場合は解決日時を上書きしない
+        if ($thread->status !== QaThreadStatus::Resolved) {
+            DB::transaction(fn () => $thread->update([
+                'status' => QaThreadStatus::Resolved,
+                'resolved_at' => now(),
+            ]));
+        }
 
         return $thread;
     }
