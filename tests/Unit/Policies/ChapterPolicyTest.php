@@ -57,8 +57,8 @@ class ChapterPolicyTest extends TestCase
         $otherChapter = Chapter::factory()->for($otherPart)->published()->create();
         $policy = new ChapterPolicy;
 
-        $this->assertTrue($policy->viewany($coach, $assignedPart));
-        $this->assertFalse($policy->viewany($coach, $otherPart));
+        $this->assertTrue($policy->viewAny($coach, $assignedPart));
+        $this->assertFalse($policy->viewAny($coach, $otherPart));
         $this->assertTrue($policy->view($coach, $assignedChapter));
         $this->assertFalse($policy->view($coach, $otherChapter));
         $this->assertTrue($policy->create($coach, $assignedPart));

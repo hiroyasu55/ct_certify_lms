@@ -101,11 +101,11 @@ class SectionQuestionPolicyTest extends TestCase
         $otherQuestion = SectionQuestion::factory()->for($otherSection)->published()->create();
         $policy = new SectionQuestionPolicy;
 
-        $this->assertTrue($policy->viewany($coach, $assignedSection));
-        $this->assertFalse($policy->viewany($coach, $otherSection));
+        $this->assertTrue($policy->viewAny($coach, $assignedSection));
+        $this->assertFalse($policy->viewAny($coach, $otherSection));
         $this->assertTrue($policy->view($coach, $assignedQuestion));
         $this->assertFalse($policy->view($coach, $otherQuestion));
         $this->assertTrue($policy->update($coach, $assignedQuestion));
-        $this->assertfalse($policy->update($coach, $otherQuestion));
+        $this->assertFalse($policy->update($coach, $otherQuestion));
     }
 }
