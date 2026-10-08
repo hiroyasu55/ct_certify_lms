@@ -63,12 +63,30 @@ class SectionPolicyTest extends TestCase
             'assigned_by_user_id' => $admin->id,
             'assigned_at' => now(),
         ]);
-        $part = Part::factory()->for($assignedCert)->published()->create();
-        $chapter = Chapter::factory()->for($part)->published()->create();
-        $section = Section::factory()->for($chapter)->published()->create();
+        $otherCert = Certification::factory()->published()->create();
+        $assignedChapter = Chapter::factory()
+            ->for(Part::factory()->for($assignedCert)->published())
+            ->published()
+            ->create();
+        $otherChapter = Chapter::factory()
+            ->for(Part::factory()->for($otherCert)->published())
+            ->published()
+            ->create();
+        $assignedSection = Section::factory()->for($assignedChapter)->published()->create();
+        $otherSection = Section::factory()->for($otherChapter)->published()->create();
         $policy = new SectionPolicy;
 
-        $this->assertTrue($policy->update($coach, $section));
-        $this->assertTrue($policy->preview($coach, $section));
+        $this->assertTrue($policy->viewany($coach, $assignedChapter));
+        $this->assertFalse($policy->viewany($coach, $otherChapter));
+        $this->assertTrue($policy->view($coach, $assignedSection));
+        $this->assertFalse($policy->view($coach, $otherSection));
+        $this->assertTrue($policy->create($coach, $assignedChapter));
+        $this->assertFalse($policy->create($coach, $otherChapter));
+        $this->assertTrue($policy->update($coach, $assignedSection));
+        $this->assertfalse($policy->update($coach, $otherSection));
+        $this->assertTrue($policy->preview($coach, $assignedSection));
+        $this->assertFalse($policy->preview($coach, $otherSection));
+        $this->assertTrue($policy->delete($coach, $assignedSection));
+        $this->assertFalse($policy->delete($coach, $otherSection));
     }
 }
