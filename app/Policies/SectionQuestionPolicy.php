@@ -30,21 +30,13 @@ class SectionQuestionPolicy
     {
         $certification = $question->section->chapter->part->certification;
 
-        if ($auth->role === UserRole::Admin) {
-            return true;
-        }
-
-        if ($auth->role === UserRole::Coach) {
-            return false;
-        }
-
-        if ($question->status !== ContentStatus::Published) {
-            return false;
-        }
-
-        return $auth->enrollments()
-            ->where('certification_id', $certification->id)
-            ->exists();
+        return match ($auth->role) {
+            UserRole::Admin, UserRole::Coach => $this->canManage($auth, $certification),
+            default => $question->status === ContentStatus::Published
+                && $auth->enrollments()
+                    ->where('certification_id', $certification->id)
+                    ->exists(),
+        };
     }
 
     public function create(User $auth, Section $section): bool
@@ -76,7 +68,7 @@ class SectionQuestionPolicy
     {
         return match ($auth->role) {
             UserRole::Admin => true,
-            UserRole::Coach => false,
+            UserRole::Coach => $this->assignedCoach($auth, $certification),
             default => false,
         };
     }

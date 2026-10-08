@@ -80,15 +80,32 @@ class SectionQuestionPolicyTest extends TestCase
             'assigned_by_user_id' => $admin->id,
             'assigned_at' => now(),
         ]);
-        $assignedQuestion = SectionQuestion::factory()->published()->create([
-            'section_id' => Section::factory()->state(fn () => [
-                'chapter_id' => Chapter::factory()
-                    ->for(Part::factory()->for($assignedCert))
-                    ->create()->id,
-            ]),
-        ]);
+        $otherCert = Certification::factory()->published()->create();
+        $assignedSection = Section::factory()
+            ->for(
+                Chapter::factory()
+                    ->for(Part::factory()->for($assignedCert)->published())
+                    ->published()
+            )
+            ->published()
+            ->create();
+        $otherSection = Section::factory()
+            ->for(
+                Chapter::factory()
+                    ->for(Part::factory()->for($otherCert)->published())
+                    ->published()
+            )
+            ->published()
+            ->create();
+        $assignedQuestion = SectionQuestion::factory()->for($assignedSection)->published()->create();
+        $otherQuestion = SectionQuestion::factory()->for($otherSection)->published()->create();
         $policy = new SectionQuestionPolicy;
 
+        $this->assertTrue($policy->viewAny($coach, $assignedSection));
+        $this->assertFalse($policy->viewAny($coach, $otherSection));
+        $this->assertTrue($policy->view($coach, $assignedQuestion));
+        $this->assertFalse($policy->view($coach, $otherQuestion));
         $this->assertTrue($policy->update($coach, $assignedQuestion));
+        $this->assertFalse($policy->update($coach, $otherQuestion));
     }
 }
