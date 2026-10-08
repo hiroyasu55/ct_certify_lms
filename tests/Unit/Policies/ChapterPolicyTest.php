@@ -68,7 +68,7 @@ class ChapterPolicyTest extends TestCase
         $this->assertTrue($policy->delete($coach, $assignedChapter));
         $this->assertFalse($policy->delete($coach, $otherChapter));
         $this->assertTrue($policy->publish($coach, $assignedChapter));
-        $this->assertTrue($policy->publish($coach, $otherChapter));
+        $this->assertFalse($policy->publish($coach, $otherChapter));
     }
 
     public function test_student_can_view_only_published_chapter(): void
