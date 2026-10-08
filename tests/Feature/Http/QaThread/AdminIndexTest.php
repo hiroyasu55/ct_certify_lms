@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Http\QaThread\Admin;
+namespace Tests\Feature\Http\QaThread;
 
 use App\Models\Certification;
 use App\Models\QaThread;
@@ -11,7 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\ContentTestHelpers;
 use Tests\TestCase;
 
-class IndexTest extends TestCase
+class AdminIndexTest extends TestCase
 {
     use ContentTestHelpers, RefreshDatabase;
 

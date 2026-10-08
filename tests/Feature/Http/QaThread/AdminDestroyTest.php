@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Http\QaThread\Admin;
+namespace Tests\Feature\Http\QaThread;
 
 use App\Models\Certification;
 use App\Models\QaReply;
@@ -11,7 +11,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class DestroyTest extends TestCase
+class AdminDestroyTest extends TestCase
 {
     use RefreshDatabase;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Http\QaReply\Admin;
+namespace Tests\Feature\Http\QaReply;
 
 use App\Models\Certification;
 use App\Models\QaReply;
@@ -12,7 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\ContentTestHelpers;
 use Tests\TestCase;
 
-class DestroyTest extends TestCase
+class AdminDestroyTest extends TestCase
 {
     use ContentTestHelpers, RefreshDatabase;
 
