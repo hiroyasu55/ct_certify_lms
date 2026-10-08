@@ -29,7 +29,7 @@ class SectionPolicy
     {
         return match ($auth->role) {
             UserRole::Admin, UserRole::Coach => $this->canManage($auth, $section->chapter->part->certification),
-            default =>  $section->status === ContentStatus::Published
+            default => $section->status === ContentStatus::Published
                 && $section->chapter->status === ContentStatus::Published
                 && $section->chapter->part->status === ContentStatus::Published,
         };
