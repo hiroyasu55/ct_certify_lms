@@ -104,7 +104,7 @@ class IndexTest extends TestCase
         $otherCert = Certification::factory()->published()->create();
 
         $response = $this->actingAs($coach)->get(route('qa-board.index', [
-            'certification_id' => $otherCert->id
+            'certification_id' => $otherCert->id,
         ]));
 
         $response->assertForbidden();

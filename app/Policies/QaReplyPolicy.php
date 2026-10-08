@@ -24,6 +24,7 @@ class QaReplyPolicy
     private function isPublished(QaThread|QaReply $target): bool
     {
         $thread = $target instanceof QaReply ? $target->thread : $target;
+
         return $thread->certification->status === CertificationStatus::Published;
     }
 
