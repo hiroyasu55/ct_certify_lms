@@ -36,7 +36,7 @@ class UpdateExamDateTest extends TestCase
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('enrollments', [
             'id' => $enrollment->id,
-            'exam_date' => $examDate,
+            'exam_date' => $examDate . ' 00:00:00',
         ]);
     }
 
